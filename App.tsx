@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ConversationProvider } from '@elevenlabs/react-native';
 import { SettingsProvider, useSettings } from './src/context/SettingsContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { RingtoneHandler } from './src/components/RingtoneHandler';
@@ -27,11 +28,13 @@ function AppContent() {
 
 export default function App() {
   return (
-    <SettingsProvider>
-      <RingtoneHandler>
-        <AppContent />
-      </RingtoneHandler>
-    </SettingsProvider>
+    <ConversationProvider>
+      <SettingsProvider>
+        <RingtoneHandler>
+          <AppContent />
+        </RingtoneHandler>
+      </SettingsProvider>
+    </ConversationProvider>
   );
 }
 

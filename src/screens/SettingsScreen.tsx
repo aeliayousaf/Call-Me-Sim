@@ -173,6 +173,15 @@ export function SettingsScreen({ navigation }: Props) {
               onValueChange={(v) => setSettings({ practiceModeLabel: v })}
             />
           </SettingRow>
+          <SettingRow
+            label="AI Voice Call"
+            description="Real-time caller speaks when you answer (30s max, requires internet)"
+          >
+            <Switch
+              value={settings.aiVoiceCallEnabled}
+              onValueChange={(v) => setSettings({ aiVoiceCallEnabled: v })}
+            />
+          </SettingRow>
         </View>
 
         <Text style={[styles.footerNote, { color: theme.textSecondary }]}>

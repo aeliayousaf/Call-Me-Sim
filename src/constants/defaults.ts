@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   vibrationEnabled: true,
   darkMode: true,
   practiceModeLabel: false,
+  aiVoiceCallEnabled: false,
 };
 
 /** Caller used when starting a simulation — saved default or built-in fallback. */

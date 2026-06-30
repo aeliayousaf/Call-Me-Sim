@@ -26,6 +26,8 @@ export interface AppSettings {
   darkMode: boolean;
   /** Shows a "Practice Mode" banner for App Store compliance */
   practiceModeLabel: boolean;
+  /** Use real-time ElevenLabs AI voice when accepting a simulated call */
+  aiVoiceCallEnabled: boolean;
 }
 
 export type RootStackParamList = {
@@ -34,5 +36,6 @@ export type RootStackParamList = {
   DelaySelection: { caller: CallerContact; autoStart?: boolean };
   IncomingCall: { caller: CallerContact };
   ActiveCall: { caller: CallerContact };
+  AiActiveCall: { caller: CallerContact };
   Settings: undefined;
 };

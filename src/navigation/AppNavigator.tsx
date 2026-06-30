@@ -9,6 +9,7 @@ import { ContactPickerScreen } from '../screens/ContactPickerScreen';
 import { DelaySelectionScreen } from '../screens/DelaySelectionScreen';
 import { IncomingCallScreen } from '../screens/IncomingCallScreen';
 import { ActiveCallScreen } from '../screens/ActiveCallScreen';
+import { AiActiveCallScreen } from '../screens/AiActiveCallScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -59,6 +60,11 @@ export function AppNavigator() {
         <Stack.Screen
           name="ActiveCall"
           component={ActiveCallScreen}
+          options={{ animation: 'fade', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="AiActiveCall"
+          component={AiActiveCallScreen}
           options={{ animation: 'fade', gestureEnabled: false }}
         />
         <Stack.Screen

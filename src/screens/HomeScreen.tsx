@@ -64,6 +64,9 @@ export function HomeScreen({ navigation }: Props) {
           <Text style={[styles.readyDetail, { color: theme.textSecondary }]}>
             Vibration: {settings.vibrationEnabled ? 'On' : 'Off'}
           </Text>
+          <Text style={[styles.readyDetail, { color: theme.textSecondary }]}>
+            AI voice: {settings.aiVoiceCallEnabled ? 'On (30s max)' : 'Off'}
+          </Text>
           <Pressable onPress={() => navigation.navigate('Settings')}>
             <Text style={[styles.customizeLink, { color: theme.primary }]}>Customize in Settings</Text>
           </Pressable>

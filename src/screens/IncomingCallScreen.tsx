@@ -53,7 +53,8 @@ export function IncomingCallScreen({ navigation, route }: Props) {
 
   const handleAccept = async () => {
     await stopAll();
-    navigation.replace('ActiveCall', { caller });
+    const screen = settings.aiVoiceCallEnabled ? 'AiActiveCall' : 'ActiveCall';
+    navigation.replace(screen, { caller });
   };
 
   return (

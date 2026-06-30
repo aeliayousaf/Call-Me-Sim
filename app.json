@@ -7,12 +7,16 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "description": "Simulate incoming phone calls for practice. Does not place real calls.",
+    "scheme": "callmenow",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.callmenow.app",
+      "buildNumber": "1",
       "infoPlist": {
         "NSContactsUsageDescription": "Call Me Now needs access to your contacts so you can choose who appears on the simulated incoming call screen.",
-        "UIBackgroundModes": ["audio"]
+        "NSMicrophoneUsageDescription": "Call Me Now needs microphone access for optional AI voice conversations during simulated calls.",
+        "UIBackgroundModes": ["audio"],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -22,15 +26,30 @@
         "backgroundImage": "./assets/android-icon-background.png"
       },
       "package": "com.callmenow.app",
+      "versionCode": 1,
       "permissions": [
         "android.permission.READ_CONTACTS",
         "android.permission.VIBRATE",
         "android.permission.POST_NOTIFICATIONS",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_CONNECT"
       ],
       "predictiveBackGestureEnabled": false
     },
     "plugins": [
+      "expo-dev-client",
+      [
+        "@livekit/react-native-expo-plugin",
+        {
+          "android": {
+            "audioType": "communication"
+          }
+        }
+      ],
+      "@config-plugins/react-native-webrtc",
       [
         "expo-contacts",
         {
@@ -48,6 +67,16 @@
     ],
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "privacyPolicyUrl": "https://callmenowapp.com/privacy.html",
+      "termsUrl": "https://callmenowapp.com/terms.html",
+      "supportEmail": "support@callmenowapp.com",
+      "aiServerUrl": "http://localhost:3001",
+      "eas": {
+        "projectId": "8bb36334-03b1-493e-be35-dd4e5f95b839"
+      }
+    },
+    "owner": "aeliayousaf"
   }
 }
