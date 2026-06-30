@@ -33,7 +33,6 @@ export function ActiveCallScreen({ navigation, route }: Props) {
     <ScreenContainer dark>
       <View style={styles.container}>
         <View style={styles.top}>
-          <Text style={styles.status}>Simulated Call</Text>
           <Text style={styles.timer}>{formattedDuration}</Text>
         </View>
 
@@ -66,16 +65,10 @@ const styles = StyleSheet.create({
   top: {
     alignItems: 'center',
     paddingTop: 24,
-    gap: 4,
-  },
-  status: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
-    fontWeight: '500',
   },
   timer: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 16,
     fontWeight: '500',
     fontVariant: ['tabular-nums'],
   },

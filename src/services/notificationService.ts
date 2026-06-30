@@ -3,6 +3,10 @@ import * as Notifications from 'expo-notifications';
 import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import { CallerContact } from '../types';
 import { serializeCaller } from './pendingCallService';
+import {
+  prepareContactImageForNotification,
+  buildNotificationAttachments,
+} from './contactImageService';
 
 export const INCOMING_CALL_CHANNEL_ID = 'incoming-call';
 export const SCHEDULED_CALL_NOTIFICATION_ID = 'scheduled-incoming-call';
@@ -23,7 +27,7 @@ Notifications.setNotificationHandler({
 export async function setupNotifications(): Promise<boolean> {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(INCOMING_CALL_CHANNEL_ID, {
-      name: 'Simulated Incoming Calls',
+      name: 'Incoming Calls',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 800, 400, 800],
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
@@ -62,14 +66,18 @@ export async function setupNotifications(): Promise<boolean> {
   return status === 'granted';
 }
 
-function buildIncomingCallContent(caller: CallerContact) {
+async function buildIncomingCallContent(caller: CallerContact) {
+  const imageUri = await prepareContactImageForNotification(caller);
+  const attachments = buildNotificationAttachments(imageUri);
+
   return {
-    title: 'Incoming call',
-    subtitle: caller.phoneNumber,
-    body: `${caller.name} is calling (simulated)`,
+    title: caller.name,
+    subtitle: Platform.OS === 'ios' ? 'Incoming call' : undefined,
+    body: Platform.OS === 'android' ? 'Incoming call' : caller.phoneNumber,
     data: {
       type: 'incoming_call',
       caller: serializeCaller(caller),
+      notificationImageUri: imageUri,
     },
     sound: true,
     priority: Notifications.AndroidNotificationPriority.MAX,
@@ -77,6 +85,7 @@ function buildIncomingCallContent(caller: CallerContact) {
     autoDismiss: false,
     categoryIdentifier: INCOMING_CALL_CATEGORY,
     interruptionLevel: 'timeSensitive' as const,
+    ...(attachments ? { attachments } : {}),
   };
 }
 
@@ -86,9 +95,11 @@ export async function scheduleIncomingCallNotification(
 ): Promise<void> {
   await Notifications.cancelScheduledNotificationAsync(SCHEDULED_CALL_NOTIFICATION_ID);
 
+  const content = await buildIncomingCallContent(caller);
+
   await Notifications.scheduleNotificationAsync({
     identifier: SCHEDULED_CALL_NOTIFICATION_ID,
-    content: buildIncomingCallContent(caller),
+    content,
     trigger: {
       type: SchedulableTriggerInputTypes.DATE,
       date: fireDate,
@@ -98,9 +109,11 @@ export async function scheduleIncomingCallNotification(
 }
 
 export async function showIncomingCallNotification(caller: CallerContact): Promise<void> {
+  const content = await buildIncomingCallContent(caller);
+
   await Notifications.scheduleNotificationAsync({
     identifier: ACTIVE_INCOMING_NOTIFICATION_ID,
-    content: buildIncomingCallContent(caller),
+    content,
     trigger: {
       channelId: INCOMING_CALL_CHANNEL_ID,
     },

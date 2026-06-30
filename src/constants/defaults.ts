@@ -9,7 +9,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   ringtone: 'classic',
   vibrationEnabled: true,
   darkMode: true,
-  practiceModeLabel: true,
+  practiceModeLabel: false,
 };
 
 /** Caller used when starting a simulation — saved default or built-in fallback. */

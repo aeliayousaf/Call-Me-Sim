@@ -57,20 +57,16 @@ export function IncomingCallScreen({ navigation, route }: Props) {
   };
 
   return (
-    <ScreenContainer dark showPracticeBanner>
+    <ScreenContainer dark>
       <View style={styles.container}>
         <View style={styles.top}>
           <Text style={styles.label}>Incoming call</Text>
-          {settings.practiceModeLabel && (
-            <Text style={styles.practiceLabel}>Practice Mode</Text>
-          )}
         </View>
 
         <View style={styles.center}>
           <ContactAvatar name={caller.name} imageUri={caller.imageUri} size={140} />
           <Text style={styles.name}>{caller.name}</Text>
           <Text style={styles.phone}>{caller.phoneNumber}</Text>
-          <Text style={styles.simulated}>Simulated call — not a real phone call</Text>
         </View>
 
         <View style={styles.controls}>
@@ -97,11 +93,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  practiceLabel: {
-    color: '#FF9500',
-    fontSize: 12,
-    fontWeight: '600',
-  },
   center: {
     alignItems: 'center',
     gap: 12,
@@ -115,13 +106,6 @@ const styles = StyleSheet.create({
   phone: {
     color: 'rgba(255,255,255,0.7)',
     fontSize: 18,
-  },
-  simulated: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
-    marginTop: 8,
-    textAlign: 'center',
-    paddingHorizontal: 32,
   },
   controls: {
     paddingBottom: 16,

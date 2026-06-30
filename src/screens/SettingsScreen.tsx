@@ -166,7 +166,7 @@ export function SettingsScreen({ navigation }: Props) {
           </SettingRow>
           <SettingRow
             label="Practice Mode Label"
-            description="Show compliance banner during simulations"
+            description="Show a disclosure banner on the home screen"
           >
             <Switch
               value={settings.practiceModeLabel}

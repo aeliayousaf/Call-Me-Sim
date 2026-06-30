@@ -183,7 +183,7 @@ export function DelaySelectionScreen({ navigation, route }: Props) {
       )}
 
       <View style={styles.footer}>
-        <Button title="Start Simulation" onPress={() => handleStart()} large />
+        <Button title="Start Call" onPress={() => handleStart()} large />
       </View>
     </ScreenContainer>
   );
