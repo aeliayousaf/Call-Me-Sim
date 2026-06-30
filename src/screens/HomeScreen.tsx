@@ -7,6 +7,9 @@ import { ScreenContainer } from '../components/ScreenContainer';
 import { Button } from '../components/Button';
 import { ContactAvatar } from '../components/ContactAvatar';
 import { formatDelayLabel } from '../services/callService';
+import { getReadyCaller } from '../constants/defaults';
+import { RINGTONE_LABELS } from '../constants/defaults';
+import { getRingtoneDisplayName } from '../services/ringtonePickerService';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -14,15 +17,16 @@ type Props = {
 
 export function HomeScreen({ navigation }: Props) {
   const { settings, theme } = useSettings();
-  const defaultCaller = settings.defaultCaller;
+  const caller = getReadyCaller(settings);
 
   const handleCallMe = () => {
-    if (defaultCaller) {
-      navigation.navigate('DelaySelection', { caller: defaultCaller });
-    } else {
-      navigation.navigate('ContactPicker', { mode: 'call' });
-    }
+    navigation.navigate('DelaySelection', { caller, autoStart: true });
   };
+
+  const ringtoneLabel =
+    settings.ringtone === 'custom'
+      ? getRingtoneDisplayName(settings.ringtone, settings.customRingtoneName)
+      : RINGTONE_LABELS[settings.ringtone];
 
   return (
     <ScreenContainer showPracticeBanner>
@@ -34,33 +38,36 @@ export function HomeScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.center}>
-        {defaultCaller ? (
-          <View style={styles.callerPreview}>
-            <ContactAvatar
-              name={defaultCaller.name}
-              imageUri={defaultCaller.imageUri}
-              size={80}
-              dark={settings.darkMode}
-            />
-            <Text style={[styles.callerName, { color: theme.text }]}>{defaultCaller.name}</Text>
-            <Text style={[styles.callerPhone, { color: theme.textSecondary }]}>
-              {defaultCaller.phoneNumber}
-            </Text>
-            <Pressable onPress={() => navigation.navigate('ContactPicker', { mode: 'call' })}>
-              <Text style={[styles.changeLink, { color: theme.primary }]}>Change caller</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            Select a contact to simulate an incoming call
+        <View style={styles.callerPreview}>
+          <ContactAvatar
+            name={caller.name}
+            imageUri={caller.imageUri}
+            size={96}
+            dark={settings.darkMode}
+          />
+          <Text style={[styles.callerName, { color: theme.text }]}>{caller.name}</Text>
+          <Text style={[styles.callerPhone, { color: theme.textSecondary }]}>
+            {caller.phoneNumber}
           </Text>
-        )}
+        </View>
 
         <Button title="Call Me" onPress={handleCallMe} large style={styles.callButton} />
 
-        <Text style={[styles.delayHint, { color: theme.textSecondary }]}>
-          Default delay: {formatDelayLabel(settings.defaultDelay)}
-        </Text>
+        <View style={[styles.readyCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <Text style={[styles.readyTitle, { color: theme.text }]}>Ready to go</Text>
+          <Text style={[styles.readyDetail, { color: theme.textSecondary }]}>
+            Delay: {formatDelayLabel(settings.defaultDelay)}
+          </Text>
+          <Text style={[styles.readyDetail, { color: theme.textSecondary }]}>
+            Ringtone: {ringtoneLabel}
+          </Text>
+          <Text style={[styles.readyDetail, { color: theme.textSecondary }]}>
+            Vibration: {settings.vibrationEnabled ? 'On' : 'Off'}
+          </Text>
+          <Pressable onPress={() => navigation.navigate('Settings')}>
+            <Text style={[styles.customizeLink, { color: theme.primary }]}>Customize in Settings</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.footer}>
@@ -95,37 +102,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 22,
-  },
   callerPreview: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 28,
     gap: 8,
   },
   callerName: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '600',
-    marginTop: 8,
+    marginTop: 12,
   },
   callerPhone: {
     fontSize: 16,
-  },
-  changeLink: {
-    fontSize: 15,
-    fontWeight: '500',
-    marginTop: 4,
   },
   callButton: {
     width: '100%',
     maxWidth: 280,
   },
-  delayHint: {
-    marginTop: 16,
+  readyCard: {
+    width: '100%',
+    maxWidth: 280,
+    marginTop: 24,
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 4,
+  },
+  readyTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  readyDetail: {
     fontSize: 14,
+  },
+  customizeLink: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 8,
   },
   footer: {
     paddingHorizontal: 24,

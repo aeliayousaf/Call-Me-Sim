@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList, DelayConfig, DelayOption } from '../types';
@@ -11,16 +11,10 @@ import { delayToMilliseconds } from '../services/callService';
 import { DELAY_LABELS } from '../constants/defaults';
 import { useCountdown } from '../hooks/useCallTimer';
 import {
-  setupNotifications,
-  scheduleIncomingCallNotification,
-  showIncomingCallNotification,
-  cancelScheduledCallNotifications,
-} from '../services/notificationService';
-import { savePendingCall, clearPendingCall } from '../services/pendingCallService';
-import {
-  startBackgroundKeepAlive,
-  stopBackgroundKeepAlive,
-} from '../services/backgroundAudioService';
+  prepareCallSimulation,
+  triggerImmediateCall,
+  cancelCallSimulation,
+} from '../services/callSimulationService';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'DelaySelection'>;
@@ -30,7 +24,7 @@ type Props = {
 const DELAY_OPTIONS: DelayOption[] = ['immediate', '10s', '30s', '1m', 'custom'];
 
 export function DelaySelectionScreen({ navigation, route }: Props) {
-  const { caller } = route.params;
+  const { caller, autoStart = false } = route.params;
   const { settings, theme, setSettings } = useSettings();
   const [selectedDelay, setSelectedDelay] = useState<DelayConfig>(settings.defaultDelay);
   const [customSeconds, setCustomSeconds] = useState(
@@ -38,11 +32,11 @@ export function DelaySelectionScreen({ navigation, route }: Props) {
   );
   const [countdownActive, setCountdownActive] = useState(false);
   const [pendingDelayMs, setPendingDelayMs] = useState(0);
+  const [isStarting, setIsStarting] = useState(autoStart);
+  const startedRef = useRef(false);
 
   const beginIncomingCall = async () => {
-    await stopBackgroundKeepAlive();
-    await clearPendingCall();
-    await showIncomingCallNotification(caller);
+    await triggerImmediateCall(caller);
     navigation.replace('IncomingCall', { caller });
   };
 
@@ -56,39 +50,58 @@ export function DelaySelectionScreen({ navigation, route }: Props) {
     return selectedDelay;
   };
 
-  const handleStart = async () => {
-    const delay = buildDelayConfig();
+  const handleStart = async (delayOverride?: DelayConfig) => {
+    const delay = delayOverride ?? buildDelayConfig();
     const ms = delayToMilliseconds(delay);
-    await setSettings({ defaultDelay: delay });
 
-    const granted = await setupNotifications();
-    if (!granted) {
-      Alert.alert(
-        'Notifications needed',
-        'Allow notifications so the simulated call can appear on your lock screen when the phone is locked.'
-      );
+    if (!delayOverride) {
+      await setSettings({ defaultDelay: delay });
     }
 
-    const fireDate = new Date(Date.now() + ms);
-    await savePendingCall({ caller, fireAt: fireDate.getTime() });
+    setIsStarting(true);
+    try {
+      const result = await prepareCallSimulation(caller, delay);
 
-    if (ms <= 0) {
-      await beginIncomingCall();
-    } else {
-      await scheduleIncomingCallNotification(caller, fireDate);
-      await startBackgroundKeepAlive();
-      setPendingDelayMs(ms);
-      setCountdownActive(true);
+      if (result.type === 'immediate') {
+        await beginIncomingCall();
+      } else {
+        setPendingDelayMs(result.delayMs);
+        setCountdownActive(true);
+      }
+    } catch (error) {
+      console.warn('Failed to start simulation:', error);
+      Alert.alert('Could not start', 'Something went wrong. Please try again.');
+      if (autoStart) {
+        navigation.goBack();
+      }
+    } finally {
+      setIsStarting(false);
     }
   };
+
+  useEffect(() => {
+    if (!autoStart || startedRef.current) return;
+    startedRef.current = true;
+    handleStart(settings.defaultDelay);
+  }, [autoStart]);
 
   const handleCancelCountdown = async () => {
     setCountdownActive(false);
     setPendingDelayMs(0);
-    await cancelScheduledCallNotifications();
-    await stopBackgroundKeepAlive();
-    await clearPendingCall();
+    await cancelCallSimulation();
+    navigation.goBack();
   };
+
+  if (isStarting && !countdownActive) {
+    return (
+      <ScreenContainer>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Starting call…</Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   if (countdownActive) {
     return (
@@ -101,12 +114,16 @@ export function DelaySelectionScreen({ navigation, route }: Props) {
             from {caller.name}
           </Text>
           <Text style={[styles.lockHint, { color: theme.textSecondary }]}>
-            You can lock your screen — the call will still come through.
+            Lock your screen — the phone will ring like a real call.
           </Text>
           <Button title="Cancel" variant="secondary" onPress={handleCancelCountdown} style={styles.cancelBtn} />
         </View>
       </ScreenContainer>
     );
+  }
+
+  if (autoStart) {
+    return null;
   }
 
   return (
@@ -166,7 +183,7 @@ export function DelaySelectionScreen({ navigation, route }: Props) {
       )}
 
       <View style={styles.footer}>
-        <Button title="Start Simulation" onPress={handleStart} large />
+        <Button title="Start Simulation" onPress={() => handleStart()} large />
       </View>
     </ScreenContainer>
   );
@@ -187,6 +204,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
   },
   callerSection: {
     alignItems: 'center',

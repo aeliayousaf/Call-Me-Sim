@@ -1,13 +1,21 @@
-import { AppSettings } from '../types';
+import { AppSettings, CallerContact } from '../types';
+import { PLACEHOLDER_CONTACTS } from './placeholders';
+
+export const DEFAULT_CALLER: CallerContact = PLACEHOLDER_CONTACTS[0];
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  defaultCaller: null,
-  defaultDelay: { type: 'immediate' },
+  defaultCaller: DEFAULT_CALLER,
+  defaultDelay: { type: '10s' },
   ringtone: 'classic',
   vibrationEnabled: true,
   darkMode: true,
   practiceModeLabel: true,
 };
+
+/** Caller used when starting a simulation — saved default or built-in fallback. */
+export function getReadyCaller(settings: AppSettings): CallerContact {
+  return settings.defaultCaller ?? DEFAULT_CALLER;
+}
 
 export const DELAY_LABELS: Record<string, string> = {
   immediate: 'Immediately',

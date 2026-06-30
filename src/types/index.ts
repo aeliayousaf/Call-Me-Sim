@@ -31,7 +31,7 @@ export interface AppSettings {
 export type RootStackParamList = {
   Home: undefined;
   ContactPicker: { mode: 'call' | 'settings' };
-  DelaySelection: { caller: CallerContact };
+  DelaySelection: { caller: CallerContact; autoStart?: boolean };
   IncomingCall: { caller: CallerContact };
   ActiveCall: { caller: CallerContact };
   Settings: undefined;

@@ -15,7 +15,7 @@ import { useSettings } from '../context/SettingsContext';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { SettingRow, SettingSection } from '../components/SettingRow';
 import { formatDelayLabel } from '../services/callService';
-import { DELAY_LABELS, RINGTONE_LABELS } from '../constants/defaults';
+import { DELAY_LABELS, RINGTONE_LABELS, getReadyCaller } from '../constants/defaults';
 import { previewRingtone } from '../services/ringtoneService';
 import {
   getRingtoneDisplayName,
@@ -82,7 +82,7 @@ export function SettingsScreen({ navigation }: Props) {
             style={[styles.row, { borderBottomColor: theme.border }]}
           >
             <Text style={[styles.rowLabel, { color: theme.text }]}>
-              {settings.defaultCaller?.name ?? 'None selected'}
+              {getReadyCaller(settings).name}
             </Text>
             <Text style={[styles.chevron, { color: theme.textSecondary }]}>›</Text>
           </Pressable>
