@@ -17,10 +17,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#1C1C1E",
+        "backgroundColor": "#84C424",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundImage": "./assets/android-icon-background.png"
       },
       "package": "com.callmenow.app",
       "permissions": [
@@ -42,7 +41,7 @@
         "expo-notifications",
         {
           "icon": "./assets/icon.png",
-          "color": "#007AFF",
+          "color": "#84C424",
           "sounds": []
         }
       ]
